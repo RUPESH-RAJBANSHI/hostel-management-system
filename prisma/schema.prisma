@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+
+enum Role {
+  ADMIN
+  WARDEN
+  STUDENT
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  TRIPLE
+  DORMITORY
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum AllocationStatus {
+  ACTIVE
+  ENDED
+}
+
+enum FeeStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  ONLINE
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Users & Students 
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(STUDENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student      Student?
+  payments     Payment[]    @relation("ReceivedBy")
+  allocations  Allocation[] @relation("AllocatedBy")
+}
+
+model Student {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studentCode   String   @unique
+  phone         String
+  dateOfBirth   DateTime?
+  gender        String?
+  address       String?
+  institution   String?
+  idDocumentUrl String?
+
+  guardianName     String
+  guardianPhone    String
+  guardianRelation String?
+
+  checkInDate   DateTime?
+  checkOutDate  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  allocations   Allocation[]
+  fees          Fee[]
+  complaints    Complaint[]
+  visitors      Visitor[]
+  leaveRequests LeaveRequest[]
+}
+
+// Buildings, Rooms, Beds 
+
+model Building {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  address String?
+  floors  Int     @default(1)
+  rooms   Room[]
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+
+  roomNumber  String
+  floor       Int      @default(0)
+  type        RoomType @default(DOUBLE)
+  capacity    Int
+  monthlyRent Decimal  @db.Decimal(10, 2)
+  amenities   String[]
+  isActive    Boolean  @default(true)
+
+  beds        Bed[]
+  complaints  Complaint[]
+
+  @@unique([buildingId, roomNumber])
+}
+
+model Bed {
+  id     String    @id @default(cuid())
+  roomId String
+  room   Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  label  String
+  status BedStatus @default(AVAILABLE)
+
+  allocations Allocation[]
+
+  @@unique([roomId, label])
+}
+
+// Allocation 
+
+model Allocation {
+  id        String           @id @default(cuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id])
+  bedId     String
+  bed       Bed              @relation(fields: [bedId], references: [id])
+
+  startDate DateTime         @default(now())
+  endDate   DateTime?
+  status    AllocationStatus @default(ACTIVE)
+  notes     String?
+
+  allocatedById String?
+  allocatedBy   User?        @relation("AllocatedBy", fields: [allocatedById], references: [id])
+
+  createdAt DateTime         @default(now())
+
+  @@index([studentId, status])
+  @@index([bedId, status])
+}
+
+// Fees & Payments
+
+model Fee {
+  id        String    @id @default(cuid())
+  studentId String
+  student   Student   @relation(fields: [studentId], references: [id])
+
+  title     String
+  amount    Decimal   @db.Decimal(10, 2)
+  dueDate   DateTime
+  status    FeeStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+
+  payments  Payment[]
+
+  @@index([studentId, status])
+  @@index([dueDate])
+}
+
+model Payment {
+  id     String        @id @default(cuid())
+  feeId  String
+  fee    Fee           @relation(fields: [feeId], references: [id])
+
+  amount    Decimal       @db.Decimal(10, 2)
+  method    PaymentMethod @default(CASH)
+  reference String?
+  paidAt    DateTime      @default(now())
+
+  receivedById String?
+  receivedBy   User?      @relation("ReceivedBy", fields: [receivedById], references: [id])
+}
+
+// Complaints, Visitors, Leave 
+
+model Complaint {
+  id        String          @id @default(cuid())
+  studentId String
+  student   Student         @relation(fields: [studentId], references: [id])
+  roomId    String?
+  room      Room?           @relation(fields: [roomId], references: [id])
+
+  title       String
+  description String
+  priority    Priority        @default(MEDIUM)
+  status      ComplaintStatus @default(OPEN)
+  resolution  String?
+
+  createdAt  DateTime        @default(now())
+  resolvedAt DateTime?
+}
+
+model Visitor {
+  id        String    @id @default(cuid())
+  studentId String
+  student   Student   @relation(fields: [studentId], references: [id])
+
+  name     String
+  phone    String?
+  relation String?
+  purpose  String?
+  checkIn  DateTime  @default(now())
+  checkOut DateTime?
+}
+
+model LeaveRequest {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  fromDate  DateTime
+  toDate    DateTime
+  reason    String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}
