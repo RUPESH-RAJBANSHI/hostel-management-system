@@ -10,6 +10,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/buildings", label: "Buildings" },
   { href: "/rooms", label: "Rooms" },
+  { href: "/students", label: "Students", roles: ["ADMIN", "WARDEN"] },
 ];
 
 // Small spinner that appears inside a link while its page is loading.
@@ -35,25 +36,27 @@ export default function StaffNav({ user }: Props) {
             Hostel Manager
           </span>
           <nav className="flex items-center gap-1 text-sm">
-            {links.map((l) => {
-              const active =
-                pathname === l.href || pathname.startsWith(l.href + "/");
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`inline-flex items-center rounded-md px-3 py-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
-                    active
-                      ? "bg-white/15 font-medium text-white"
-                      : "text-white/70 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {l.label}
-                  <LinkSpinner />
-                </Link>
-              );
-            })}
+            {links
+              .filter((l) => !l.roles || l.roles.includes(user.role))
+              .map((l) => {
+                const active =
+                  pathname === l.href || pathname.startsWith(l.href + "/");
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`inline-flex items-center rounded-md px-3 py-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                      active
+                        ? "bg-white/15 font-medium text-white"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {l.label}
+                    <LinkSpinner />
+                  </Link>
+                );
+              })}
           </nav>
         </div>
 
