@@ -14,9 +14,13 @@ const STATUS: Record<BedStatus, { label: string; bar: string }> = {
 };
 
 function bedClasses(status: BedStatus) {
-  if (status === "OCCUPIED") return "border-[#3949B8] bg-[#3949B8] text-white";
+  if (status === "OCCUPIED") {
+    return "border-[#3949B8] bg-[#3949B8] text-white";
+  }
 
-  if (status === "MAINTENANCE") return "border-[#D9962B] text-[#6B4608]";
+  if (status === "MAINTENANCE") {
+    return "border-[#D9962B] text-[#6B4608]";
+  }
 
   return "border-[#14907F] bg-[#D8F0EB] text-[#0B5B50]";
 }
@@ -115,7 +119,6 @@ export default async function DashboardPage() {
             },
           },
         },
-
         fees: {
           orderBy: {
             dueDate: "asc",
@@ -128,19 +131,16 @@ export default async function DashboardPage() {
             },
           },
         },
-
         complaints: {
           orderBy: {
             createdAt: "desc",
           },
         },
-
         leaveRequests: {
           orderBy: {
             createdAt: "desc",
           },
         },
-
         visitors: {
           orderBy: {
             checkIn: "desc",
@@ -156,12 +156,10 @@ export default async function DashboardPage() {
             <h1 className="text-2xl font-bold text-gray-900">
               Student Profile Not Found
             </h1>
-
             <p className="mt-2 text-gray-500">
               Your account exists, but no student profile is connected to it.
               Please contact your hostel administrator.
             </p>
-
             <form action={logout} className="mt-5">
               <button className="rounded-lg bg-indigo-600 px-5 py-2 text-white">
                 Log out
@@ -212,7 +210,6 @@ export default async function DashboardPage() {
               </h1>
               <p className="text-xs text-[#5B6784]">Student Portal</p>
             </div>
-
             <form action={logout}>
               <button className="rounded-lg border border-[#DDE2EC] px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Log out
@@ -226,7 +223,6 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-bold tracking-tight text-[#17143A]">
               Welcome back, {firstName}!
             </h2>
-
             <p className="mt-1 text-sm text-[#5B6784]">
               {today} · Here is your hostel information.
             </p>
@@ -239,21 +235,18 @@ export default async function DashboardPage() {
               subtitle="Your identification"
               color="indigo"
             />
-
             <DashboardCard
               title="Room Number"
               value={room?.roomNumber ?? "Not assigned"}
               subtitle={building?.name ?? "No building assigned"}
               color="blue"
             />
-
             <DashboardCard
               title="Total Paid"
               value={money(totalPaid)}
               subtitle="Recorded payments"
               color="green"
             />
-
             <DashboardCard
               title="Outstanding Fees"
               value={money(outstanding)}
@@ -262,9 +255,7 @@ export default async function DashboardPage() {
             />
           </section>
 
-          {/* Student detail cards */}
           <section className="grid gap-5 lg:grid-cols-3">
-            {/* Room Details */}
             <div className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                 My Room Details
@@ -301,7 +292,6 @@ export default async function DashboardPage() {
                         <p className="text-xs font-medium text-gray-500">
                           Amenities
                         </p>
-
                         <div className="mt-2 flex flex-wrap gap-2">
                           {room.amenities.map((amenity) => (
                             <span
@@ -321,7 +311,6 @@ export default async function DashboardPage() {
                   <p className="font-medium text-yellow-800">
                     No room assigned yet
                   </p>
-
                   <p className="mt-1 text-sm text-yellow-700">
                     Please contact your hostel administrator to get a room and
                     bed allocation.
@@ -330,7 +319,6 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            {/* Personal Information */}
             <div className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                 My Personal Information
@@ -359,7 +347,6 @@ export default async function DashboardPage() {
               </ReadMore>
             </div>
 
-            {/* Guardian Information */}
             <div className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                 Guardian Information
@@ -381,19 +368,16 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* Fees and Payments */}
           <section className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                   My Fees & Payments
                 </h3>
-
                 <p className="text-sm text-gray-500">
                   Your hostel fee records and payment history.
                 </p>
               </div>
-
               <div className="text-right">
                 <p className="text-xs text-gray-500">Outstanding Balance</p>
                 <p className="text-xl font-bold text-orange-600">
@@ -429,9 +413,7 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* Complaints and Leave Requests */}
           <section className="grid gap-5 lg:grid-cols-2">
-            {/* Complaints */}
             <div className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                 My Complaints
@@ -465,7 +447,6 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            {/* Leave Requests */}
             <div className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
                 My Leave Requests
@@ -497,7 +478,6 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          {/* Recent Visitors */}
           <section className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
             <h3 className="text-lg font-bold tracking-tight text-[#17143A]">
               Recent Visitors
@@ -532,7 +512,6 @@ export default async function DashboardPage() {
     );
   }
 
-  // Admin and Warden dashboard
   const buildings = await prisma.building.findMany({
     orderBy: { name: "asc" },
     include: {
@@ -550,7 +529,8 @@ export default async function DashboardPage() {
   const allRooms = buildings.flatMap((b) => b.rooms);
   const allBeds = allRooms.flatMap((r) => r.beds);
 
-  const count = (s: BedStatus) => allBeds.filter((b) => b.status === s).length;
+  const count = (status: BedStatus) =>
+    allBeds.filter((bed) => bed.status === status).length;
 
   const counts = {
     AVAILABLE: count("AVAILABLE"),
@@ -564,7 +544,7 @@ export default async function DashboardPage() {
     ? Math.round((counts.OCCUPIED / totalBeds) * 100)
     : 0;
 
-  const activeRooms = allRooms.filter((r) => r.isActive).length;
+  const activeRooms = allRooms.filter((room) => room.isActive).length;
 
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -584,14 +564,12 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Welcome back, {firstName}
           </h1>
-
           <p className="text-sm text-[#5B6784]">{today}</p>
         </div>
 
         <section className="rounded-xl border border-[#DDE2EC] bg-white p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-semibold">Bed occupancy</h2>
-
             <p className="text-sm text-[#5B6784]">
               {totalBeds === 0
                 ? "No beds yet"
@@ -612,13 +590,13 @@ export default async function DashboardPage() {
                 aria-label={`${counts.AVAILABLE} available, ${counts.OCCUPIED} occupied, ${counts.MAINTENANCE} in maintenance`}
               >
                 {(Object.keys(STATUS) as BedStatus[]).map(
-                  (s) =>
-                    counts[s] > 0 && (
+                  (status) =>
+                    counts[status] > 0 && (
                       <div
-                        key={s}
+                        key={status}
                         style={{
-                          flexGrow: counts[s],
-                          backgroundColor: STATUS[s].bar,
+                          flexGrow: counts[status],
+                          backgroundColor: STATUS[status].bar,
                         }}
                       />
                     ),
@@ -626,17 +604,15 @@ export default async function DashboardPage() {
               </div>
 
               <dl className="mt-4 grid grid-cols-3 gap-4">
-                {(Object.keys(STATUS) as BedStatus[]).map((s) => (
-                  <div key={s} className="flex items-center gap-3">
-                    <BedCell status={s} size="h-6 w-6" />
-
+                {(Object.keys(STATUS) as BedStatus[]).map((status) => (
+                  <div key={status} className="flex items-center gap-3">
+                    <BedCell status={status} size="h-6 w-6" />
                     <div>
                       <dd className="text-xl font-semibold leading-none">
-                        {counts[s]}
+                        {counts[status]}
                       </dd>
-
                       <dt className="mt-1 text-xs text-[#5B6784]">
-                        {STATUS[s].label}
+                        {STATUS[status].label}
                       </dt>
                     </div>
                   </div>
@@ -655,12 +631,11 @@ export default async function DashboardPage() {
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-3">
             <h2 className="text-lg font-semibold">Bed map</h2>
-
             <div className="flex flex-wrap gap-4 text-xs text-[#5B6784]">
-              {(Object.keys(STATUS) as BedStatus[]).map((s) => (
-                <span key={s} className="inline-flex items-center gap-1.5">
-                  <BedCell status={s} size="h-4 w-4" />
-                  {STATUS[s].label}
+              {(Object.keys(STATUS) as BedStatus[]).map((status) => (
+                <span key={status} className="inline-flex items-center gap-1.5">
+                  <BedCell status={status} size="h-4 w-4" />
+                  {STATUS[status].label}
                 </span>
               ))}
             </div>
@@ -669,11 +644,9 @@ export default async function DashboardPage() {
           {buildings.length === 0 && (
             <div className="rounded-xl border border-dashed border-[#C5CDDD] bg-white p-8 text-center">
               <p className="font-medium">Your hostel is empty for now</p>
-
               <p className="mt-1 text-sm text-[#5B6784]">
                 Start by adding your first building.
               </p>
-
               <Link
                 href="/buildings"
                 className="mt-4 inline-block rounded-md bg-[#16213A] px-4 py-2 text-sm font-medium text-white hover:bg-[#223256]"
@@ -683,60 +656,61 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {buildings.map((b) => {
-            const beds = b.rooms.flatMap((r) => r.beds);
-
-            const occupied = beds.filter((x) => x.status === "OCCUPIED").length;
+          {buildings.map((building) => {
+            const beds = building.rooms.flatMap((room) => room.beds);
+            const occupied = beds.filter(
+              (bed) => bed.status === "OCCUPIED",
+            ).length;
 
             return (
               <article
-                key={b.id}
+                key={building.id}
                 className="rounded-xl border border-[#DDE2EC] bg-white p-5"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold">{b.name}</h3>
-
+                    <h3 className="font-semibold">{building.name}</h3>
                     <p className="text-xs text-[#5B6784]">
-                      {b.floors} {b.floors === 1 ? "floor" : "floors"},{" "}
-                      {b.rooms.length} {b.rooms.length === 1 ? "room" : "rooms"}
-                      , {occupied} of {beds.length} beds in use
+                      {building.floors}{" "}
+                      {building.floors === 1 ? "floor" : "floors"},{" "}
+                      {building.rooms.length}{" "}
+                      {building.rooms.length === 1 ? "room" : "rooms"},{" "}
+                      {occupied} of {beds.length} beds in use
                     </p>
                   </div>
 
                   <Link
-                    href={`/rooms?building=${b.id}`}
+                    href={`/rooms?building=${building.id}`}
                     className="text-sm font-medium text-[#3949B8] hover:underline"
                   >
                     Manage rooms
                   </Link>
                 </div>
 
-                {b.rooms.length === 0 ? (
+                {building.rooms.length === 0 ? (
                   <p className="mt-3 text-sm text-[#5B6784]">
                     No rooms in this building yet.
                   </p>
                 ) : (
                   <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2">
-                    {b.rooms.map((r) => (
+                    {building.rooms.map((room) => (
                       <div
-                        key={r.id}
+                        key={room.id}
                         className={`rounded-lg border border-[#E3E7F0] bg-[#F7F8FB] p-2.5 ${
-                          r.isActive ? "" : "opacity-50"
+                          room.isActive ? "" : "opacity-50"
                         }`}
                       >
                         <div className="mb-2 text-xs font-medium text-[#5B6784]">
-                          Room {r.roomNumber}
-                          {!r.isActive && " (inactive)"}
+                          Room {room.roomNumber}
+                          {!room.isActive && " (inactive)"}
                         </div>
-
                         <div className="flex flex-wrap gap-1">
-                          {r.beds.map((bed) => (
+                          {room.beds.map((bed) => (
                             <BedCell
                               key={bed.id}
                               status={bed.status}
                               label={bed.label}
-                              title={`Room ${r.roomNumber}, bed ${bed.label}: ${STATUS[bed.status].label.toLowerCase()}`}
+                              title={`Room ${room.roomNumber}, bed ${bed.label}: ${STATUS[bed.status].label.toLowerCase()}`}
                             />
                           ))}
                         </div>
@@ -794,7 +768,6 @@ function FeeTable({ fees }: { fees: Array<any> }) {
           <th className="p-3">Status</th>
         </tr>
       </thead>
-
       <tbody className="divide-y divide-gray-100">
         {fees.map((fee) => {
           const paid = fee.payments.reduce(
@@ -834,7 +807,6 @@ function ComplaintItem({ complaint }: { complaint: any }) {
     <div className="rounded-xl border border-gray-100 bg-[#FAF9FF] p-4 transition-colors hover:border-[#C6B8FF]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-medium text-gray-800">{complaint.title}</p>
-
         <span
           className={`rounded-full px-2.5 py-1 text-xs ${statusClass(
             complaint.status,
@@ -843,13 +815,10 @@ function ComplaintItem({ complaint }: { complaint: any }) {
           {complaint.status.replace("_", " ")}
         </span>
       </div>
-
       <p className="mt-1 text-sm text-gray-500">{complaint.description}</p>
-
       <p className="mt-2 text-xs text-gray-400">
         {formatDate(complaint.createdAt)} · Priority: {complaint.priority}
       </p>
-
       {complaint.resolution && (
         <p className="mt-2 text-sm text-green-700">
           Resolution: {complaint.resolution}
@@ -864,7 +833,6 @@ function LeaveItem({ request }: { request: any }) {
     <div className="rounded-xl border border-gray-100 bg-[#FAF9FF] p-4 transition-colors hover:border-[#C6B8FF]">
       <div className="flex items-center justify-between gap-2">
         <p className="font-medium text-gray-800">{request.reason}</p>
-
         <span
           className={`rounded-full px-2.5 py-1 text-xs ${statusClass(
             request.status,
@@ -873,7 +841,6 @@ function LeaveItem({ request }: { request: any }) {
           {request.status.replace("_", " ")}
         </span>
       </div>
-
       <p className="mt-2 text-xs text-gray-500">
         {formatDate(request.fromDate)} – {formatDate(request.toDate)}
       </p>
@@ -893,7 +860,6 @@ function VisitorTable({ visitors }: { visitors: Array<any> }) {
           <th className="p-3">Check-out</th>
         </tr>
       </thead>
-
       <tbody className="divide-y divide-gray-100">
         {visitors.map((visitor) => (
           <tr key={visitor.id} className="transition-colors hover:bg-[#FAF9FF]">
@@ -915,7 +881,6 @@ function Info({ label, value }: { label: string; value: string }) {
       <p className="text-[11px] font-semibold uppercase tracking-wider text-[#77718F]">
         {label}
       </p>
-
       <p className="mt-1.5 break-words text-sm font-semibold text-[#17143A]">
         {value}
       </p>
@@ -923,18 +888,15 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DashboardCard({
-  title,
-  value,
-  subtitle,
-  color,
-}: {
+type DashboardCardProps = {
   title: string;
-  value: string;
+  value: string | number;
   subtitle: string;
   color: "indigo" | "blue" | "green" | "orange";
-}) {
-  const colors = {
+};
+
+function DashboardCard({ title, value, subtitle, color }: DashboardCardProps) {
+  const colors: Record<DashboardCardProps["color"], string> = {
     indigo: "border-l-indigo-500",
     blue: "border-l-blue-500",
     green: "border-l-green-500",
@@ -946,11 +908,9 @@ function DashboardCard({
       className={`rounded-xl border border-[#DDE2EC] border-l-4 ${colors[color]} bg-white p-4`}
     >
       <p className="text-sm text-gray-500">{title}</p>
-
       <p className="mt-2 break-words text-xl font-bold text-[#16213A]">
         {value}
       </p>
-
       <p className="mt-1 text-xs text-gray-400">{subtitle}</p>
     </div>
   );
@@ -960,7 +920,6 @@ function Figure({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-5 py-4">
       <div className="text-2xl font-semibold leading-none">{value}</div>
-
       <div className="mt-1.5 text-sm text-[#5B6784]">{label}</div>
     </div>
   );
