@@ -1,9 +1,10 @@
 ﻿import Link from "next/link";
 import type { ReactNode } from "react";
-import { requireUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { logout } from "@/app/actions/auth";
 import StaffNav from "@/app/components/StaffNav";
+import { requireUser } from "@/lib/dal";
+import { redirect } from "next/navigation";
 
 type BedStatus = "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
 
@@ -512,20 +513,88 @@ export default async function DashboardPage() {
     );
   }
 
-  const buildings = await prisma.building.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      rooms: {
-        orderBy: [{ floor: "asc" }, { roomNumber: "asc" }],
-        include: {
-          beds: {
-            orderBy: { label: "asc" },
+  if (user.role !== "ADMIN" && user.role !== "WARDEN") {
+    redirect("/login");
+  }
+
+  const [
+    buildings,
+    totalStudents,
+    totalFees,
+    totalCollections,
+    openComplaints,
+    pendingLeaves,
+    recentStudents,
+    recentPayments,
+  ] = await Promise.all([
+    prisma.building.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        rooms: {
+          orderBy: [{ floor: "asc" }, { roomNumber: "asc" }],
+          include: {
+            beds: {
+              orderBy: { label: "asc" },
+            },
           },
         },
       },
-    },
-  });
+    }),
 
+    prisma.student.count(),
+
+    prisma.fee.aggregate({
+      _sum: { amount: true },
+    }),
+
+    prisma.payment.aggregate({
+      _sum: { amount: true },
+    }),
+
+    prisma.complaint.count({
+      where: { status: "OPEN" },
+    }),
+
+    prisma.leaveRequest.count({
+      where: { status: "PENDING" },
+    }),
+
+    prisma.student.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    }),
+
+    prisma.payment.findMany({
+      orderBy: { paidAt: "desc" },
+      take: 5,
+      include: {
+        fee: {
+          include: {
+            student: {
+              include: {
+                user: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const feeAmount = Number(totalFees._sum.amount ?? 0);
+  const collectedAmount = Number(totalCollections._sum.amount ?? 0);
   const allRooms = buildings.flatMap((b) => b.rooms);
   const allBeds = allRooms.flatMap((r) => r.beds);
 
@@ -566,6 +635,186 @@ export default async function DashboardPage() {
           </h1>
           <p className="text-sm text-[#5B6784]">{today}</p>
         </div>
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <DashboardCard
+            title="Total Students"
+            value={totalStudents}
+            subtitle="Registered students"
+            color="indigo"
+          />
+
+          <DashboardCard
+            title="Total Fees"
+            value={money(feeAmount)}
+            subtitle="Total recorded fees"
+            color="blue"
+          />
+
+          <DashboardCard
+            title="Total Collections"
+            value={money(collectedAmount)}
+            subtitle="Payments received"
+            color="green"
+          />
+
+          <DashboardCard
+            title="Open Complaints"
+            value={openComplaints}
+            subtitle="Awaiting resolution"
+            color="orange"
+          />
+
+          <DashboardCard
+            title="Pending Leaves"
+            value={pendingLeaves}
+            subtitle="Awaiting approval"
+            color="indigo"
+          />
+        </section>
+
+        <section className="grid gap-5 lg:grid-cols-2">
+          <div className="rounded-xl border border-[#DDE2EC] bg-white p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold">Recent Students</h2>
+                <p className="mt-1 text-xs text-[#5B6784]">
+                  Latest student registrations
+                </p>
+              </div>
+
+              <Link
+                href="/students"
+                className="text-sm font-medium text-[#3949B8] hover:underline"
+              >
+                View all
+              </Link>
+            </div>
+
+            {recentStudents.length === 0 ? (
+              <p className="mt-5 text-sm text-[#5B6784]">
+                No students registered yet.
+              </p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {recentStudents.slice(0, 3).map((student) => (
+                  <div
+                    key={student.id}
+                    className="flex items-center justify-between gap-3 rounded-lg bg-[#F7F8FB] p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[#17143A]">
+                        {student.user.name}
+                      </p>
+                      <p className="truncate text-xs text-[#5B6784]">
+                        {student.studentCode} · {student.user.email}
+                      </p>
+                    </div>
+
+                    <span className="shrink-0 text-xs text-[#77718F]">
+                      {formatDate(student.createdAt)}
+                    </span>
+                  </div>
+                ))}
+
+                {recentStudents.length > 3 && (
+                  <ReadMore>
+                    {recentStudents.slice(3).map((student) => (
+                      <div
+                        key={student.id}
+                        className="flex items-center justify-between gap-3 rounded-lg bg-[#F7F8FB] p-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[#17143A]">
+                            {student.user.name}
+                          </p>
+                          <p className="truncate text-xs text-[#5B6784]">
+                            {student.studentCode} · {student.user.email}
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 text-xs text-[#77718F]">
+                          {formatDate(student.createdAt)}
+                        </span>
+                      </div>
+                    ))}
+                  </ReadMore>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-[#DDE2EC] bg-white p-5">
+            <div>
+              <h2 className="font-semibold">Recent Payments</h2>
+              <p className="mt-1 text-xs text-[#5B6784]">
+                Latest payments received
+              </p>
+            </div>
+
+            {recentPayments.length === 0 ? (
+              <p className="mt-5 text-sm text-[#5B6784]">
+                No payments recorded yet.
+              </p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {recentPayments.slice(0, 3).map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="flex items-center justify-between gap-3 rounded-lg bg-[#F7F8FB] p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[#17143A]">
+                        {payment.fee.student.user.name}
+                      </p>
+                      <p className="truncate text-xs text-[#5B6784]">
+                        {payment.fee.title} · {payment.method.replace("_", " ")}
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-semibold text-green-700">
+                        {money(Number(payment.amount))}
+                      </p>
+                      <p className="text-xs text-[#77718F]">
+                        {formatDate(payment.paidAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                {recentPayments.length > 3 && (
+                  <ReadMore>
+                    {recentPayments.slice(3).map((payment) => (
+                      <div
+                        key={payment.id}
+                        className="flex items-center justify-between gap-3 rounded-lg bg-[#F7F8FB] p-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[#17143A]">
+                            {payment.fee.student.user.name}
+                          </p>
+                          <p className="truncate text-xs text-[#5B6784]">
+                            {payment.fee.title} ·{" "}
+                            {payment.method.replace("_", " ")}
+                          </p>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-sm font-semibold text-green-700">
+                            {money(Number(payment.amount))}
+                          </p>
+                          <p className="text-xs text-[#77718F]">
+                            {formatDate(payment.paidAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </ReadMore>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
 
         <section className="rounded-xl border border-[#DDE2EC] bg-white p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
